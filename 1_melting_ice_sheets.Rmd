@@ -13,6 +13,8 @@ knitr::opts_chunk$set(fig.width=6, fig.asp = 0.618, collapse=TRUE)
 
 ***
 
+2022.1.27
+
 **Don't forget to fork the Unit 2 GitHub repository** 
 
 https://github.com/MSCI-758/unit_2_climate 
@@ -106,11 +108,23 @@ lines(mass_Gt ~ decimal_date, data=grn_ice_loss_with_NA, type='l', col='red')
 
 NASA provided sigma, or one standard deviation, uncertainty data, which represents 68% of uncertainty. (Note in the header, they call it "1-sigma", but this doesn't mean "one minus the standard deviation", it means "one standard deviation"). However, in science, sometimes we show errors as "2-sigma", where 2 X sigma represents 95% uncertainty. We can plot 95% confidence intervals around the data by adding and subtracting 2*sigma from the mass loss estimates
 
+***
+
+2022.2.1 
+
 ```{r}
 head(ant_ice_loss_with_NA)
-plot(mass_Gt ~ decimal_date, data=ant_ice_loss_with_NA, ylab="Antarctica Mass Loss (Gt)", xlab="Year", type='l') +
+# save as pdf 
+pdf("figures/ice_mass_trends.pdf", width = 7, height = 5)
+plot(mass_Gt ~ decimal_date, data=ant_ice_loss_with_NA, ylab="Ice Mass Loss (Gt)", xlab="Year", type='l', ylim = range(grn_ice_loss_with_NA$mass_Gt, na.rm = T)) +
 lines((mass_Gt+2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', lty='dashed') +
-lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', lty='dashed') 
+lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', lty='dashed') +
+# add Greenland data to plot 
+lines(mass_Gt ~ decimal_date, data=grn_ice_loss_with_NA, ylab="Greenland Mass Loss (Gt)", xlab="Year", type='l', col = "red") +
+lines((mass_Gt+2*sigma_Gt) ~ decimal_date, data=grn_ice_loss_with_NA, type='l', lty='dashed', col ="red") +
+lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=grn_ice_loss_with_NA, type='l', lty='dashed', col="red") 
+dev.off()
+# have to close pdf 
 ```
 
 ***
@@ -119,34 +133,22 @@ lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', 
 
 Create the same time series figure with 95% confidence intervals for the Greenland ice sheet mass loss.
 
+
+
 ***
-
-### Saving plots to hard drive
-
-Now we can combine our Antarctic and Greenland time series plots into the same plot and save our nice figure:
-
-```{r}
-pdf('figures/ice_mass_trends.pdf', width=7, height=5)
-plot(mass_Gt ~ decimal_date, data=ant_ice_loss_with_NA, ylab="Ice Sheet Mass Loss (Gt)", xlab="Year", type='l', ylim=range(grn_ice_loss_with_NA$mass_Gt, na.rm=TRUE), lwd=2) +
-lines((mass_Gt+2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', lty='dashed') +
-lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=ant_ice_loss_with_NA, type='l', lty='dashed') +
-lines(mass_Gt ~ decimal_date, data=grn_ice_loss_with_NA, type='l', col='red', lwd=2) +
-lines((mass_Gt+2*sigma_Gt) ~ decimal_date, data=grn_ice_loss_with_NA, type='l', lty='dashed', col="red") +
-lines((mass_Gt-2*sigma_Gt) ~ decimal_date, data=grn_ice_loss_with_NA, type='l', lty='dashed', col="red") 
-dev.off()
-```
 
 Let's make a bar plot showing the difference in ice mass loss for Antarctica and Greenland:
 
 ```{r}
 # Largest observed decrease in ice mass loss in Antarctica:
 min(ant_ice_loss$mass_Gt)
+min(grn_ice_loss$mass_Gt)
 
 # Barplot of largest observed ice loss in Antarctica and Greenland
 barplot(height=c(min(ant_ice_loss$mass_Gt), min(grn_ice_loss$mass_Gt)))
 
 # Flip to negative to positive, add x-axis labels, add more tick marks on y-axis, add y-axis title
-barplot(height=c(min(ant_ice_loss$mass_Gt)*(-1), min(grn_ice_loss$mass_Gt)*(-1)), names.arg=c("Antarctica","Greenland"), ylim=c(0,5000), ylab="Ice loss in Gt")
+barplot(height=c(min(ant_ice_loss$mass_Gt)*(-1), min(grn_ice_loss$mass_Gt)*(-1)), names.arg=c("Antarctica","Greenland"), ylim=c(0,5000), ylab="Ice loss (Gt)")
 ```
 
 ***
@@ -156,4 +158,18 @@ barplot(height=c(min(ant_ice_loss$mass_Gt)*(-1), min(grn_ice_loss$mass_Gt)*(-1))
 Calculate the average annual ice loss (a.k.a. the annual rate of ice loss) for each ice sheet by dividing the change in ice lost from the beginning to the end of the time series by the total time that passed. Then display the ice loss rates in a bar graph. Save the bar graph into the `figures/` directory in this repo.
 
 ***
+
+```{r}
+DiffAnt = c(max(ant_ice_loss$mass_Gt) - min(ant_ice_loss$mass_Gt))
+AntTot = DiffAnt / max(ant_ice_loss$decimal_date - min(ant_ice_loss$decimal_date)) 
+
+DiffGrn = c(max(grn_ice_loss$mass_Gt) - min(grn_ice_loss$mass_Gt))
+GrnTot = DiffGrn / max(grn_ice_loss$decimal_date - min(grn_ice_loss$decimal_date)) 
+
+pdf("figures/Ice_Melt_Per_Year.pdf", height = 5)
+barplot(height = c(AntTot, GrnTot), names.arg=c("Antarctica","Greenland"), ylim = c(0,300), ylab="Ice loss per year (Gt/year)")
+dev.off()
+
+```
+
 
